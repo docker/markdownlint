@@ -73,12 +73,17 @@ func main() {
 			fmt.Printf("ERROR (%s) frontmatter: %s\n", file, err)
 		}
 
-		err = checkers.CheckMarkdownLinks(reader, file)
-		if err != nil {
-			// this only errors if there is a fatal issue
-			fmt.Printf("ERROR (%s) links: %s\n", file, err)
-			data.AllFiles[file].FormatErrorCount++
-		}
+	    if draft, ok := data.AllFiles[file].Meta["draft"]; ok || draft == "true" {
+            fmt.Printf("Draft=%s: SKIPPING %s link check.\n", draft, file)
+        } else {
+            //fmt.Printf("Draft=%s: %s link check.\n", draft, file)
+            err = checkers.CheckMarkdownLinks(reader, file)
+            if err != nil {
+                // this only errors if there is a fatal issue
+                fmt.Printf("ERROR (%s) links: %s\n", file, err)
+                data.AllFiles[file].FormatErrorCount++
+            }
+        }
 		reader.Close()
 	}
 	checkers.TestLinks()
